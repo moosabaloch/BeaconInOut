@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView beaconState, currentBeacon;
     private ArrayList<String> historyStrings;
     private ArrayAdapter<String> historyAdaptor;
+    private Intent serviceIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,8 +39,10 @@ public class MainActivity extends AppCompatActivity {
         historyList.setAdapter(historyAdaptor);
         beaconState = (TextView) findViewById(R.id.display_beacon_state);
         currentBeacon = (TextView) findViewById(R.id.connectedBeacon);
+        beaconState.setText(R.string.no_beacon);
         initBR();
-        startService(new Intent(this, BackgroundService.class));
+        serviceIntent = new Intent(this, BackgroundService.class);
+        startService(serviceIntent);
         final Beacon beacon = Beacon.newBuilder()
                 .setUUID(SIR_SYED_CLASS)
                 .setMajor(0)
@@ -47,6 +50,13 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         IBeaconScanner.getInstance().startMonitoring(beacon);
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        stopService(serviceIntent);
+        super.onDestroy();
 
     }
 
@@ -62,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
 
                     historyStrings.add("Entry Time : "+millisToTime(System.currentTimeMillis()));
                     historyAdaptor.notifyDataSetChanged();
-                    beaconState.setText("Welcome To the Mobile Development Class");
+                    beaconState.setText(R.string.welcome);
                     currentBeacon.setText(curBeacon);
                 } catch (Exception ex) {
                     Toast.makeText(MainActivity.this, "Something went wrong (onEnter)", Toast.LENGTH_LONG).show();
@@ -81,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
 
                     historyStrings.add("Leave Time : "+millisToTime(System.currentTimeMillis()));
                     historyAdaptor.notifyDataSetChanged();
-                    beaconState.setText("Good Bye");
+                    beaconState.setText(R.string.bye);
                     currentBeacon.setText(curBeacon);
                 } catch (Exception ex) {
                     Toast.makeText(MainActivity.this, "Something went wrong (onExit)", Toast.LENGTH_LONG).show();
